@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memoria de trabajo — Pipeline DevOps</title>
+  <style>:root {
+  --tinta: #1c2430;
+  --suave: #5b6675;
+  --azul: #0b5cad;
+  --azul-oscuro: #083b6e;
+  --verde: #157347;
+  --borde: #d8dee7;
+  --fondo-suave: #f6f8fb;
+  --codigo: #eef2f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: #e9edf3;
+  color: var(--tinta);
+  font-family: Charter, Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.62;
+}
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 10px 24px;
+  background: #102033;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+.barra button {
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 14px;
+  background: #2f81f7;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.barra button:hover {
+  background: #1f6fdd;
+}
+
+.documento {
+  max-width: 860px;
+  margin: 32px auto;
+  padding: 56px 64px 72px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 30, 60, 0.12);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin-top: 0;
+  color: var(--azul-oscuro);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.25;
+}
+
+h1 {
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 4px solid var(--azul);
+  font-size: 2rem;
+}
+
+h2 {
+  margin-top: 2.4rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--borde);
+  font-size: 1.45rem;
+}
+
+h3 {
+  margin-top: 1.8rem;
+  margin-bottom: 0.6rem;
+  color: var(--tinta);
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0.7rem 0;
+  text-align: justify;
+  hyphens: auto;
+}
+
+ul,
+ol {
+  margin: 0.6rem 0 0.9rem;
+  padding-left: 1.5rem;
+}
+
+li {
+  margin: 0.3rem 0;
+}
+
+a {
+  color: var(--azul);
+  overflow-wrap: anywhere;
+}
+
+strong {
+  color: #12202f;
+}
+
+table {
+  width: 100%;
+  margin: 1rem 0 1.4rem;
+  border-collapse: collapse;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.88rem;
+}
+
+thead th {
+  padding: 0.55rem 0.65rem;
+  background: var(--azul-oscuro);
+  color: #ffffff;
+  text-align: left;
+  font-weight: 600;
+}
+
+tbody td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--fondo-suave);
+}
+
+code {
+  padding: 0.12em 0.35em;
+  border-radius: 4px;
+  background: var(--codigo);
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.86em;
+}
+
+pre {
+  margin: 1rem 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: #0f1b2a;
+  color: #e6edf5;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1em;
+}
+
+blockquote {
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  border-left: 4px solid var(--azul);
+  background: var(--fondo-suave);
+  color: var(--suave);
+}
+
+img {
+  max-width: 100%;
+}
+
+figure {
+  margin: 1.6rem 0;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+}
+
+figcaption {
+  margin-top: 0.5rem;
+  color: var(--suave);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+figure.figura img {
+  border-radius: 8px;
+}
+
+.captura .marco {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  border: 1px dashed #b9c4d2;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.captura .pendiente {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  color: #7a8797;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.captura .pendiente span {
+  color: #56657a;
+  font-weight: 600;
+}
+
+.captura .pendiente small {
+  font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.captura .marco img {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.page-break {
+  page-break-before: always;
+}
+
+@media (max-width: 700px) {
+  body {
+    font-size: 15px;
+  }
+
+  .documento {
+    margin: 0;
+    padding: 28px 20px 48px;
+  }
+
+  .barra {
+    padding: 10px 16px;
+  }
+
+  .barra span {
+    display: none;
+  }
+
+  .barra button {
+    margin-left: auto;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 17mm 15mm;
+  }
+
+  body {
+    background: #ffffff;
+    font-size: 10.5pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .documento {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  h1 {
+    font-size: 20pt;
+  }
+
+  h2 {
+    font-size: 14pt;
+    break-after: avoid;
+  }
+
+  h3 {
+    font-size: 11.5pt;
+    break-after: avoid;
+  }
+
+  table,
+  figure,
+  pre {
+    break-inside: avoid;
+  }
+
+  a {
+    color: var(--tinta);
+    text-decoration: none;
+  }
+
+  .captura .marco {
+    min-height: 55mm;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="barra no-print">
+    <span>Memoria de trabajo · Módulo 2 · Pipeline DevOps</span>
+    <button type="button" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+  <main class="documento">
+<h1>Memoria de trabajo: implantación de un pipeline DevOps</h1>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Asignatura</strong></td>
+<td>[Nombre de la asignatura]</td>
+</tr>
+<tr>
+<td><strong>Módulo</strong></td>
+<td>2 — Integración y entrega continuas</td>
+</tr>
+<tr>
+<td><strong>Alumno</strong></td>
+<td>[Nombre y apellidos]</td>
+</tr>
+<tr>
+<td><strong>Fecha</strong></td>
+<td>23 de noviembre de 2026</td>
+</tr>
+<tr>
+<td><strong>Repositorio</strong></td>
+<td><code>https://github.com/[usuario]/pipeline-devops</code></td>
+</tr>
+</tbody></table>
+<h2>Resumen ejecutivo</h2>
+<p>Esta memoria documenta la construcción de dos pipelines DevOps sobre una
+misma aplicación de saludos. En la <strong>parte A</strong> se monta un proceso de
+integración continua con <strong>CircleCI</strong> a partir del material entregado en el
+campus: una aplicación Python, tres tests con <code>pytest</code> y un fichero de
+configuración de CircleCI. En la <strong>parte B</strong> el proyecto evoluciona a una
+aplicación <strong>Node.js/Express</strong>, se publica en <strong>GitHub</strong> y se implanta un
+pipeline completo con <strong>GitHub Actions</strong>: integración continua con lint,
+pruebas unitarias, de integración y basadas en propiedades, cobertura,
+auditorías de seguridad y análisis estático; y entrega continua con
+<strong>Docker</strong>, publicación en <strong>GitHub Container Registry (GHCR)</strong> y un <em>smoke
+test</em> sobre la imagen publicada. El resultado pasa de 3 tests y un pipeline
+solo de CI a 27 tests, ocho tipos de verificación y un CD que únicamente se
+ejecuta después de que el CI haya terminado correctamente.</p>
+<h2>1. Introducción y objetivos</h2>
+<h3>1.1 Contexto</h3>
+<p>La integración continua (CI) consiste en integrar los cambios en la rama
+principal de forma frecuente y verificar automáticamente cada integración:
+compilar, analizar el código y ejecutar los tests. La entrega continua (CD)
+lleva esa base un paso más allá: si el CI es correcto, el artefacto se
+publica y se despliega de forma automatizada y repetible.</p>
+<p>El objetivo de la actividad es entender un pipeline como una cadena de
+responsabilidades: <strong>cada etapa solo debe ejecutarse si la anterior ha
+pasado</strong>, y todo el proceso debe poder reproducirse sin intervención manual.</p>
+<h3>1.2 Objetivos</h3>
+<ul>
+<li>Implantar un primer pipeline de CI con CircleCI a partir del material del
+campus (parte A).</li>
+<li>Modificar el pipeline y la aplicación, cambiando de lenguaje y ampliando la
+estrategia de pruebas (parte B).</li>
+<li>Publicar el código en GitHub y usar GitHub Actions para CI y CD.</li>
+<li>Integrar Docker como mecanismo de entrega y publicar imágenes versionadas.</li>
+<li>Incorporar tipos de prueba adicionales: integración, propiedades,
+cobertura, análisis estático, auditoría de dependencias y <em>smoke test</em>.</li>
+<li>Documentar las decisiones, los problemas encontrados y las mejoras.</li>
+</ul>
+<h3>1.3 Metodología</h3>
+<p>Se trabaja con dos commits principales y dos etiquetas:</p>
+<table>
+<thead>
+<tr>
+<th>Etiqueta</th>
+<th>Contenido</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>parte-a</code></td>
+<td>Aplicación Python, tests con pytest y pipeline de CircleCI</td>
+</tr>
+<tr>
+<td><code>parte-b</code></td>
+<td>Aplicación Node.js, pirámide de pruebas, GitHub Actions CI/CD y Docker</td>
+</tr>
+</tbody></table>
+<p>El repositorio conserva la versión Python en <code>legacy/parte-a/</code> y la
+configuración original del zip en <code>docs/reference/</code>, de modo que la evolución
+queda trazable.</p>
+<figure class="figura"><img src="diagrama-pipeline.svg" alt="Figura 1 — Arquitectura del pipeline de la parte B"><figcaption>Figura 1 — Arquitectura del pipeline de la parte B</figcaption></figure>
+<h2>2. Parte A — Primer pipeline con CircleCI</h2>
+<h3>2.1 Material de partida</h3>
+<p>El zip del campus contiene los siguientes ficheros:</p>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Contenido</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>saludar.py</code></td>
+<td>Tres funciones que devuelven saludos y un <code>print</code> aleatorio</td>
+</tr>
+<tr>
+<td><code>test_saludar.py</code></td>
+<td>Tres tests unitarios con <code>pytest</code></td>
+</tr>
+<tr>
+<td><code>requirements.txt</code></td>
+<td>Dependencias de Python</td>
+</tr>
+<tr>
+<td><code>Dockerfile</code></td>
+<td>Imagen Alpine que instala Python</td>
+</tr>
+<tr>
+<td><code>circleci/config.yml</code></td>
+<td>Configuración del pipeline en CircleCI</td>
+</tr>
+</tbody></table>
+<h3>2.2 Análisis del código y de los tests</h3>
+<p>La aplicación tiene una parte pura y fácil de probar: <code>saludo1()</code>,
+<code>saludo2()</code> y <code>saludo3()</code> devuelven cadenas constantes. Sin embargo, el
+código mezcla la lógica con la ejecución: al importar el módulo se elige un
+número aleatorio y se imprime un saludo. Esa mezcla tiene consecuencias:</p>
+<ul>
+<li>Los tests importan el módulo y, como efecto colateral, ejecutan el <code>print</code>.</li>
+<li>La selección aleatoria y la rama <code>else</code> no se prueban.</li>
+<li>No hay una interfaz HTTP ni un punto de entrada claro.</li>
+<li>No se mide la cobertura.</li>
+</ul>
+<p>Los tres tests existentes son correctos y verifican el contrato de las
+funciones, pero solo cubren la parte más sencilla. El Dockerfile tampoco
+ejecuta la aplicación: instala Python y copia los ficheros, pero no define
+<code>CMD</code>, por lo que no constituye una entrega funcional.</p>
+<h3>2.3 Problemas detectados en la configuración</h3>
+<p>La configuración entregada no es ejecutable hoy sin cambios. La siguiente
+tabla resume los problemas y la solución aplicada:</p>
+<table>
+<thead>
+<tr>
+<th>Problema</th>
+<th>Consecuencia</th>
+<th>Solución</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>version: 2</code></td>
+<td>Versión antigua de CircleCI</td>
+<td>Migrar a <code>version: 2.1</code></td>
+</tr>
+<tr>
+<td>Imagen <code>circleci/python:3.7</code></td>
+<td>Imagen retirada; el job no arranca</td>
+<td>Usar <code>cimg/python:3.12</code></td>
+</tr>
+<tr>
+<td><code>pytest 6.2.2</code> y <code>flake8 3.9.0</code></td>
+<td>Versiones incompatibles con Python actual</td>
+<td>Actualizar a <code>pytest 8.x</code> y <code>flake8 7.x</code></td>
+</tr>
+<tr>
+<td>Paso de Docker comentado</td>
+<td>El pipeline no construye ni publica nada</td>
+<td>Asumir que la parte A es solo CI</td>
+</tr>
+<tr>
+<td>Sin caché</td>
+<td>Cada ejecución reinstala todo</td>
+<td>Añadir caché en la parte B</td>
+</tr>
+<tr>
+<td>Sin cobertura ni artefactos</td>
+<td>No hay evidencia medible de calidad</td>
+<td>Añadir cobertura en la parte B</td>
+</tr>
+<tr>
+<td><code>source</code> en lugar de <code>.</code></td>
+<td>Menos portable entre shells</td>
+<td>Usar <code>. venv/bin/activate</code></td>
+</tr>
+</tbody></table>
+<p>La configuración original se conserva íntegra en
+<code>docs/reference/config-original-circleci.yml</code>; la versión corregida y
+ejecutable está en <code>legacy/parte-a/circleci-config-parte-a.yml</code>.</p>
+<h3>2.4 Pipeline implementado</h3>
+<p>El pipeline de la parte A tiene un único job <code>build</code> con tres pasos:</p>
+<pre><code class="language-yaml">version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Instalar dependencias
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+      - run:
+          name: Ejecutar flake8 y pytest
+          command: |
+            . venv/bin/activate
+            flake8 --exclude=venv* --statistics
+            pytest -v
+
+workflows:
+  ci-parte-a:
+    jobs:
+      - build
+</code></pre>
+<p>La secuencia es deliberadamente sencilla: obtener el código, preparar el
+entorno y ejecutar lint y tests. El pipeline falla si <code>flake8</code> encuentra
+algún aviso o si un test no pasa.</p>
+<h3>2.5 Puesta en marcha y evidencias</h3>
+<p>El proceso seguido fue:</p>
+<ol>
+<li>Crear el repositorio en GitHub y subir los ficheros.</li>
+<li>Entrar en CircleCI con la cuenta de GitHub.</li>
+<li>Seleccionar <strong>Set Up Project → Use existing config</strong> para que CircleCI
+usara el <code>.circleci/config.yml</code> del repositorio.</li>
+<li>Hacer un commit y observar la ejecución del workflow <code>ci-parte-a</code>.</li>
+</ol>
+<p>En local, la misma secuencia produce:</p>
+<ul>
+<li><code>flake8</code>: sin avisos.</li>
+<li><code>pytest</code>: <strong>3 tests superados</strong>.</li>
+</ul>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/a1-repo-github.png</small></div>
+    <img src="capturas/a1-repo-github.png" alt="Figura A1 — Repositorio del proyecto en GitHub" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura A1 — Repositorio del proyecto en GitHub</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/a2-circleci-setup.png</small></div>
+    <img src="capturas/a2-circleci-setup.png" alt="Figura A2 — Configuración del proyecto en CircleCI" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura A2 — Configuración del proyecto en CircleCI</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/a3-pipeline-verde.png</small></div>
+    <img src="capturas/a3-pipeline-verde.png" alt="Figura A3 — Workflow ci-parte-a en verde" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura A3 — Workflow ci-parte-a en verde</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/a4-detalle-tests.png</small></div>
+    <img src="capturas/a4-detalle-tests.png" alt="Figura A4 — Detalle del job build" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura A4 — Detalle del job build</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/a5-log-pytest.png</small></div>
+    <img src="capturas/a5-log-pytest.png" alt="Figura A5 — Salida de pytest con los tres tests superados" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura A5 — Salida de pytest con los tres tests superados</figcaption>
+</figure>
+<h3>2.6 Conclusiones de la parte A</h3>
+<p>La parte A demuestra el concepto de CI con muy poca infraestructura, pero
+también deja visibles sus límites: un solo job, tests escasos, sin cobertura,
+sin construcción de imagen y sin entrega. Esos límites son precisamente el
+punto de partida de la parte B.</p>
+<div class="page-break"></div><h2>3. Parte B — Segundo pipeline: GitHub Actions y Docker</h2>
+<h3>3.1 Decisiones de diseño</h3>
+<p>Se reescribe la aplicación en <strong>Node.js con Express</strong> por tres motivos:</p>
+<ol>
+<li>El enunciado sugiere cambiar de lenguaje y así se demuestra una migración
+real, no solo un cambio de fichero YAML.</li>
+<li>Una API HTTP permite pruebas de integración reales con <code>supertest</code>, algo
+que la aplicación Python original no ofrecía.</li>
+<li>Express genera una imagen Docker pequeña y un <em>smoke test</em> muy claro
+mediante el endpoint <code>/health</code>.</li>
+</ol>
+<p>La lógica de negocio se separa de la infraestructura: <code>greetings.js</code> contiene
+las reglas puras, <code>app.js</code> construye la aplicación Express y <code>server.js</code> es el
+único punto que abre un puerto. Esta separación permite probar la app sin
+levantar un servidor real.</p>
+<h3>3.2 Nueva aplicación</h3>
+<table>
+<thead>
+<tr>
+<th>Método</th>
+<th>Ruta</th>
+<th>Ejemplo</th>
+<th>Respuesta</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/</code></td>
+<td><code>/</code></td>
+<td><code>{&quot;message&quot;:&quot;Hola, mundo!&quot;}</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/health</code></td>
+<td><code>/health</code></td>
+<td><code>{&quot;status&quot;:&quot;ok&quot;,&quot;uptime&quot;:1.23}</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/languages</code></td>
+<td><code>/languages</code></td>
+<td><code>{&quot;languages&quot;:[&quot;es&quot;,&quot;en&quot;,&quot;fr&quot;]}</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/greet/:name</code></td>
+<td><code>/greet/Ana?lang=en</code></td>
+<td><code>{&quot;message&quot;:&quot;Hello, Ana!&quot;}</code></td>
+</tr>
+</tbody></table>
+<p>La aplicación valida el nombre (letras Unicode, espacios, apóstrofos y
+guiones, hasta 50 caracteres) y el idioma (<code>es</code>, <code>en</code>, <code>fr</code>). Los errores de
+validación devuelven <code>400</code> y las rutas desconocidas <code>404</code>.</p>
+<p>Estructura del código:</p>
+<pre><code class="language-text">src/
+├── app.js          # Factoría de la aplicación Express
+├── greetings.js    # Lógica de negocio pura
+└── server.js       # Arranque HTTP y apagado ordenado (SIGINT/SIGTERM)
+</code></pre>
+<h3>3.3 Estrategia de pruebas</h3>
+<p>Se aplica una pirámide de pruebas: muchas pruebas rápidas y aisladas en la
+base, menos pruebas de integración y un <em>smoke test</em> sobre el contenedor en la
+cima.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Herramienta</th>
+<th>Qué comprueba</th>
+<th>Nº</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unitarias</td>
+<td>Jest</td>
+<td>Saludos, validación de nombres e idiomas</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Integración</td>
+<td>Jest + Supertest</td>
+<td>Rutas HTTP, códigos 200/400/404 y cuerpo de las respuestas</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Basadas en propiedades</td>
+<td>fast-check</td>
+<td>Invariantes sobre cientos de nombres e idiomas generados</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Cobertura</td>
+<td>Jest</td>
+<td>Umbral mínimo de 80 % en ramas y 85 % en líneas/funciones</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Estática</td>
+<td>ESLint</td>
+<td>Errores, variables sin usar y malas prácticas</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Dependencias (SCA)</td>
+<td><code>npm audit</code></td>
+<td>Vulnerabilidades conocidas en dependencias de producción</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Seguridad estática (SAST)</td>
+<td>CodeQL</td>
+<td>Patrones inseguros en el código</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Contenedor</td>
+<td>Docker + <code>curl</code></td>
+<td>La imagen arranca y <code>/health</code> responde</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p><strong>Total: 27 tests.</strong> La cobertura obtenida es del <strong>97,05 %</strong> en sentencias y
+líneas, <strong>92,3 %</strong> en ramas y <strong>100 %</strong> en funciones. La única rama sin cubrir
+es la respuesta <code>500</code>, que requiere un error inesperado no reproducible con
+la lógica actual; se mantiene como red de seguridad.</p>
+<p>Las pruebas basadas en propiedades merecen una explicación: en lugar de
+escribir ejemplos concretos, se declara una propiedad que debe cumplirse
+siempre y <code>fast-check</code> genera entradas aleatorias para intentar falsearla.
+Por ejemplo:</p>
+<ul>
+<li>Para cualquier nombre válido, <code>greet(name)</code> debe empezar por <code>&quot;Hola, &quot;</code>,
+terminar en <code>&quot;!&quot;</code> e incluir el nombre.</li>
+<li>Para cualquier idioma fuera del catálogo, <code>greet</code> debe lanzar
+<code>RangeError</code>.</li>
+</ul>
+<p>Esto complementa a los tests de ejemplo: encuentra casos límite que no se
+habrían escrito a mano.</p>
+<p>Ejemplo de prueba de integración:</p>
+<pre><code class="language-js">test(&#39;GET /greet/Ana?lang=en saluda en inglés&#39;, async () =&gt; {
+  const res = await request(app).get(&#39;/greet/Ana?lang=en&#39;).expect(200);
+  expect(res.body.message).toBe(&#39;Hello, Ana!&#39;);
+});
+</code></pre>
+<h3>3.4 Repositorio en GitHub</h3>
+<p>El repositorio se organiza con <code>main</code> como rama protegida, dos etiquetas
+(<code>parte-a</code> y <code>parte-b</code>) y workflows separados por responsabilidad. La
+protección de <code>main</code> exige que los checks del CI estén en verde antes de
+fusionar un pull request. Las capturas B1 y B7 documentan la estructura y la
+configuración de la rama.</p>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b1-estructura-repo.png</small></div>
+    <img src="capturas/b1-estructura-repo.png" alt="Figura B1 — Estructura final del repositorio en GitHub" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B1 — Estructura final del repositorio en GitHub</figcaption>
+</figure>
+<h3>3.5 Integración continua con GitHub Actions</h3>
+<p><code>.github/workflows/ci.yml</code> se ejecuta en cada <code>push</code> a <code>main</code> y en cada pull
+request. Incluye cuatro jobs:</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Qué hace</th>
+<th>Detalle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lint</code></td>
+<td>ESLint sobre todo el proyecto</td>
+<td>Falla ante cualquier error</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>Jest con cobertura</td>
+<td>Matriz Node 20 y 22; umbral de cobertura</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td><code>npm audit --omit=dev</code></td>
+<td>Falla con vulnerabilidades altas o críticas</td>
+</tr>
+<tr>
+<td><code>docker-build</code></td>
+<td>Construcción de la imagen y <em>smoke test</em></td>
+<td>Depende de lint, test y security</td>
+</tr>
+</tbody></table>
+<p>Decisiones técnicas relevantes:</p>
+<ul>
+<li><strong>Matriz de versiones</strong>: el mismo código se prueba en Node 20 (LTS) y Node
+22, lo que detecta incompatibilidades entre versiones.</li>
+<li><strong>Caché de npm</strong>: <code>actions/setup-node</code> con <code>cache: npm</code> evita descargar
+dependencias en cada ejecución.</li>
+<li><strong>Caché de Docker</strong>: <code>cache-from/cache-to: type=gha</code> reutiliza capas entre
+ejecuciones y acelera la construcción.</li>
+<li><strong>Concurrencia</strong>: si se empujan varios commits seguidos al mismo ref, la
+ejecución anterior se cancela (<code>cancel-in-progress: true</code>).</li>
+<li><strong>Permisos mínimos</strong>: el workflow solo necesita <code>contents: read</code>.</li>
+<li><strong>Artefacto de cobertura</strong>: el informe <code>coverage/</code> se publica como
+artefacto descargable durante 7 días.</li>
+</ul>
+<p>El job <code>docker-build</code> construye la imagen <strong>antes</strong> de que el CD publique
+nada. Así se detecta un Dockerfile roto en el CI y no en el momento del
+despliegue.</p>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b2-actions-ci.png</small></div>
+    <img src="capturas/b2-actions-ci.png" alt="Figura B2 — Workflow CI con todos los jobs en verde" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B2 — Workflow CI con todos los jobs en verde</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b3-cobertura.png</small></div>
+    <img src="capturas/b3-cobertura.png" alt="Figura B3 — Cobertura y artefacto generado" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B3 — Cobertura y artefacto generado</figcaption>
+</figure>
+<h3>3.6 Entrega continua con Docker</h3>
+<p><code>.github/workflows/cd.yml</code> no se dispara con cada <code>push</code>: usa el evento
+<code>workflow_run</code> para ejecutarse <strong>solo cuando el workflow CI ha terminado con
+éxito sobre <code>main</code></strong>. También admite tags <code>v*</code> y ejecución manual.</p>
+<p>El job <code>publish</code>:</p>
+<ol>
+<li>Hace checkout del <strong>commit exacto</strong> que validó el CI
+(<code>github.event.workflow_run.head_sha</code>).</li>
+<li>Construye la imagen de producción.</li>
+<li>Se autentica en GHCR con el <code>GITHUB_TOKEN</code> efímero del workflow.</li>
+<li>Publica la imagen con tags de rama, tag, SHA y <code>latest</code>.</li>
+<li>Exporta el <strong>digest inmutable</strong> (<code>sha256:...</code>).</li>
+</ol>
+<p>El job <code>smoke-test</code> descarga la imagen publicada <strong>por digest</strong>, la arranca y
+comprueba que <code>/health</code> responde. Se prueba exactamente el artefacto que se
+ha publicado, no una reconstrucción local. El job <code>deploy</code> es opcional y solo
+se activa con la variable <code>DEPLOY_ENABLED=true</code>; despliega por SSH en un
+servidor con Docker y la misma imagen por digest.</p>
+<p>El Dockerfile es multi-stage:</p>
+<pre><code class="language-dockerfile">FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+FROM node:20-alpine
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+COPY src ./src
+USER node
+EXPOSE 3000
+HEALTHCHECK CMD wget -qO- http://127.0.0.1:3000/health || exit 1
+CMD [&quot;node&quot;, &quot;src/server.js&quot;]
+</code></pre>
+<p>Ventajas: la imagen final no contiene <code>devDependencies</code>, tests ni documentación;
+se ejecuta como usuario sin privilegios; incluye un <code>HEALTHCHECK</code> que Docker
+y el orquestador pueden usar; y el <code>package-lock.json</code> garantiza instalaciones
+reproducibles con <code>npm ci</code>.</p>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b4-codeql.png</small></div>
+    <img src="capturas/b4-codeql.png" alt="Figura B4 — Análisis CodeQL en la pestaña Security" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B4 — Análisis CodeQL en la pestaña Security</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b5-cd-smoke.png</small></div>
+    <img src="capturas/b5-cd-smoke.png" alt="Figura B5 — Workflow CD: publicación y smoke test en verde" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B5 — Workflow CD: publicación y smoke test en verde</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b6-ghcr-package.png</small></div>
+    <img src="capturas/b6-ghcr-package.png" alt="Figura B6 — Imagen publicada en GitHub Packages (GHCR)" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B6 — Imagen publicada en GitHub Packages (GHCR)</figcaption>
+</figure>
+<h3>3.7 Seguridad del pipeline</h3>
+<table>
+<thead>
+<tr>
+<th>Medida</th>
+<th>Para qué</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>permissions</code> mínimos por workflow y job</td>
+<td>Limitar el alcance del <code>GITHUB_TOKEN</code></td>
+</tr>
+<tr>
+<td><code>GITHUB_TOKEN</code> en lugar de credenciales fijas</td>
+<td>Token efímero y rotado por GitHub</td>
+</tr>
+<tr>
+<td>Sin secretos en el repositorio</td>
+<td>Evitar filtraciones; <code>.gitignore</code> y <code>.dockerignore</code></td>
+</tr>
+<tr>
+<td><code>npm audit --omit=dev</code></td>
+<td>Detectar vulnerabilidades en dependencias de producción</td>
+</tr>
+<tr>
+<td>CodeQL</td>
+<td>Análisis estático de patrones inseguros</td>
+</tr>
+<tr>
+<td>Contenedor non-root</td>
+<td>Reducir el impacto de una vulnerabilidad en la app</td>
+</tr>
+<tr>
+<td>Imagen Alpine mínima</td>
+<td>Menos superficie de ataque</td>
+</tr>
+<tr>
+<td>Protección de <code>main</code></td>
+<td>Evitar fusiones sin CI en verde</td>
+</tr>
+<tr>
+<td>Entorno <code>production</code> en el deploy</td>
+<td>Permite exigir revisión manual antes de desplegar</td>
+</tr>
+</tbody></table>
+<p>Como mejora futura, en un entorno real conviene fijar las <em>actions</em> por SHA
+en lugar de por etiqueta, y usar <em>pull requests</em> de Dependabot para mantener
+las dependencias actualizadas.</p>
+<h3>3.8 Comparativa CircleCI y GitHub Actions</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>CircleCI</th>
+<th>GitHub Actions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Integración con GitHub</td>
+<td>Servicio externo con OAuth</td>
+<td>Nativa</td>
+</tr>
+<tr>
+<td>Configuración</td>
+<td><code>.circleci/config.yml</code></td>
+<td><code>.github/workflows/*.yml</code></td>
+</tr>
+<tr>
+<td>Ejecutores</td>
+<td>Docker, máquina y macOS</td>
+<td>Ubuntu, Windows, macOS y contenedores</td>
+</tr>
+<tr>
+<td>Reutilización</td>
+<td>Orbs</td>
+<td>Actions del Marketplace</td>
+</tr>
+<tr>
+<td>Matriz de versiones</td>
+<td><code>matrix</code> en la configuración</td>
+<td><code>strategy.matrix</code></td>
+</tr>
+<tr>
+<td>Secretos</td>
+<td>Variables y contextos</td>
+<td>Secrets y environments</td>
+</tr>
+<tr>
+<td>Registro de imágenes</td>
+<td>Credenciales de registro externo</td>
+<td>GHCR con <code>GITHUB_TOKEN</code></td>
+</tr>
+<tr>
+<td>Coste</td>
+<td>Plan gratuito con límites</td>
+<td>Minutos gratuitos según plan; GHCR incluido</td>
+</tr>
+<tr>
+<td>Curva de aprendizaje</td>
+<td>Media</td>
+<td>Baja si el código ya está en GitHub</td>
+</tr>
+</tbody></table>
+<p>GitHub Actions simplifica el proyecto porque el código, los <em>issues</em>, los
+pull requests, los checks y el registro de imágenes viven en el mismo sitio.
+CircleCI sigue siendo una opción sólida y su configuración es algo más
+explícita, pero obliga a gestionar una integración adicional y credenciales
+de registro por separado.</p>
+<h3>3.9 Mejoras respecto a la parte A</h3>
+<ol>
+<li><strong>Cambio de lenguaje y de arquitectura</strong>: de un script Python con <code>print</code>
+a una API Express con separación entre lógica, aplicación y servidor.</li>
+<li><strong>De 3 a 27 tests</strong>, con pruebas unitarias, de integración y basadas en
+propiedades.</li>
+<li><strong>Cobertura medida y exigida</strong>: umbral que rompe el pipeline si baja.</li>
+<li><strong>Lint moderno y reproducible</strong> con ESLint y configuración versionada.</li>
+<li><strong>Auditoría de dependencias (SCA)</strong> integrada en el CI.</li>
+<li><strong>Análisis estático de seguridad (SAST)</strong> con CodeQL.</li>
+<li><strong>Matriz de Node 20 y 22</strong> para detectar incompatibilidades.</li>
+<li><strong>Caché de npm y de Docker</strong> para reducir tiempos.</li>
+<li><strong>Cancelación de ejecuciones obsoletas</strong> y permisos mínimos.</li>
+<li><strong>Dockerfile multi-stage, non-root y con healthcheck</strong>, inexistente en la
+parte A.</li>
+<li><strong>CD real</strong>: publicación en GHCR, referencia por digest y <em>smoke test</em> de
+la imagen publicada.</li>
+<li><strong>CD condicionado al CI</strong>: no se publica nada si el CI no está en verde
+sobre <code>main</code>.</li>
+<li><strong>Despliegue opcional por SSH</strong> con la misma imagen inmutable.</li>
+<li><strong>Trazabilidad</strong>: etiquetas <code>parte-a</code>/<code>parte-b</code>, configuración original
+conservada y memoria versionada junto al código.</li>
+</ol>
+<h3>3.10 Evidencias adicionales</h3>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b7-branch-protection.png</small></div>
+    <img src="capturas/b7-branch-protection.png" alt="Figura B7 — Protección de la rama main con checks requeridos" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B7 — Protección de la rama main con checks requeridos</figcaption>
+</figure>
+<figure class="captura">
+  <div class="marco">
+    <div class="pendiente"><span>📸 Captura pendiente</span><small>Guardar como capturas/b8-pr-checks.png</small></div>
+    <img src="capturas/b8-pr-checks.png" alt="Figura B8 — Pull request con los checks del CI en verde" onerror="this.style.display='none'">
+  </div>
+  <figcaption>Figura B8 — Pull request con los checks del CI en verde</figcaption>
+</figure>
+<h2>4. Conclusiones</h2>
+<p>La actividad muestra que un pipeline no es solo un fichero YAML: es una
+cadena de garantías. La parte A permitió comprobar lo sencillo que resulta
+ejecutar tests en la nube con CircleCI, pero también que un pipeline sin
+cobertura, sin imagen y sin entrega se queda a medio camino. La parte B
+convierte ese esqueleto en un proceso completo:</p>
+<ul>
+<li><strong>Calidad medible</strong>: 27 tests, cobertura con umbral y análisis estático.</li>
+<li><strong>Seguridad integrada</strong>: auditoría de dependencias, CodeQL, permisos
+mínimos y contenedor sin privilegios.</li>
+<li><strong>Entrega reproducible</strong>: imagen inmutable publicada en GHCR y probada
+antes de cualquier despliegue.</li>
+<li><strong>Automatización condicionada</strong>: el CD solo avanza si el CI ha pasado.</li>
+</ul>
+<p>El aprendizaje principal es que la automatización debe ser <strong>fallar pronto y
+fallar claro</strong>: es mejor detectar un Dockerfile roto en el CI que en el
+servidor de producción, y es mejor que un umbral de cobertura rompa el
+pipeline a que la calidad se degrade en silencio.</p>
+<p>Como líneas de trabajo futuras: separar entornos de <em>staging</em> y producción,
+usar <em>Infrastructure as Code</em> (Terraform), añadir Dependabot, firmar imágenes
+con <code>cosign</code>, desplegar en Kubernetes y añadir observabilidad (métricas y
+logs centralizados).</p>
+<h2>5. Referencias</h2>
+<ul>
+<li>CircleCI. <em>Configuration reference</em>.
+<a href="https://circleci.com/docs/configuration-reference/">https://circleci.com/docs/configuration-reference/</a></li>
+<li>CircleCI. <em>Convenience images</em>.
+<a href="https://circleci.com/developer/images">https://circleci.com/developer/images</a></li>
+<li>GitHub. <em>GitHub Actions documentation</em>.
+<a href="https://docs.github.com/en/actions">https://docs.github.com/en/actions</a></li>
+<li>GitHub. <em>Events that trigger workflows: workflow_run</em>.
+<a href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run">https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run</a></li>
+<li>GitHub. <em>Working with the Container registry</em>.
+<a href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry">https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry</a></li>
+<li>Docker. <em>Multi-stage builds</em>.
+<a href="https://docs.docker.com/build/building/multi-stage/">https://docs.docker.com/build/building/multi-stage/</a></li>
+<li>Docker. <em>build-push-action</em>.
+<a href="https://github.com/docker/build-push-action">https://github.com/docker/build-push-action</a></li>
+<li>Docker. <em>metadata-action</em>.
+<a href="https://github.com/docker/metadata-action">https://github.com/docker/metadata-action</a></li>
+<li>GitHub. <em>CodeQL</em>.
+<a href="https://codeql.github.com/">https://codeql.github.com/</a></li>
+<li>Jest. <em>Documentation</em>.
+<a href="https://jestjs.io/docs/getting-started">https://jestjs.io/docs/getting-started</a></li>
+<li>Supertest. <em>Documentation</em>.
+<a href="https://github.com/ladjs/supertest">https://github.com/ladjs/supertest</a></li>
+<li>fast-check. <em>Documentation</em>.
+<a href="https://fast-check.dev/">https://fast-check.dev/</a></li>
+<li>ESLint. <em>Documentation</em>.
+<a href="https://eslint.org/docs/latest/">https://eslint.org/docs/latest/</a></li>
+</ul>
+<div class="page-break"></div><h2>Anexo A — Comandos utilizados</h2>
+<h3>Comprobaciones locales</h3>
+<pre><code class="language-bash">npm ci
+npm run lint
+npm run test:coverage
+npm run security
+npm run verify
+npm start
+</code></pre>
+<h3>Git y GitHub</h3>
+<pre><code class="language-bash">git init -b main
+git add -A
+git commit -m &quot;Parte A: pipeline de CI con CircleCI&quot;
+git tag -a parte-a -m &quot;Parte A: CircleCI&quot;
+git commit -m &quot;Parte B: Node.js, GitHub Actions y Docker&quot;
+git tag -a parte-b -m &quot;Parte B: CI/CD completo&quot;
+
+git remote add origin https://github.com/[usuario]/pipeline-devops.git
+git push -u origin main --tags
+</code></pre>
+<h3>Reproducir la parte A en CircleCI</h3>
+<pre><code class="language-bash">git branch parte-a-demo parte-a
+git push origin parte-a-demo
+# Conectar el proyecto en CircleCI y capturar la ejecución
+git push origin --delete parte-a-demo
+git branch -d parte-a-demo
+</code></pre>
+<h3>Publicar una release</h3>
+<pre><code class="language-bash">git tag -a v2.0.0 -m &quot;Parte B: CI/CD con GitHub Actions&quot;
+git push origin v2.0.0
+</code></pre>
+<h3>Docker</h3>
+<pre><code class="language-bash">docker build -t pipeline-devops .
+docker run --rm -p 3000:3000 pipeline-devops
+docker compose up --build
+</code></pre>
+<h3>Generar la memoria imprimible</h3>
+<pre><code class="language-bash">npm run docs:build
+open docs/memoria.html   # Imprimir → Guardar como PDF
+</code></pre>
+<h2>Anexo B — Checklist de capturas</h2>
+<table>
+<thead>
+<tr>
+<th>Figura</th>
+<th>Archivo</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A1</td>
+<td><code>capturas/a1-repo-github.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>A2</td>
+<td><code>capturas/a2-circleci-setup.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>A3</td>
+<td><code>capturas/a3-pipeline-verde.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>A4</td>
+<td><code>capturas/a4-detalle-tests.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>A5</td>
+<td><code>capturas/a5-log-pytest.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B1</td>
+<td><code>capturas/b1-estructura-repo.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>capturas/b2-actions-ci.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B3</td>
+<td><code>capturas/b3-cobertura.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B4</td>
+<td><code>capturas/b4-codeql.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B5</td>
+<td><code>capturas/b5-cd-smoke.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B6</td>
+<td><code>capturas/b6-ghcr-package.png</code></td>
+<td>Pendiente</td>
+</tr>
+<tr>
+<td>B7</td>
+<td><code>capturas/b7-branch-protection.png</code></td>
+<td>Opcional</td>
+</tr>
+<tr>
+<td>B8</td>
+<td><code>capturas/b8-pr-checks.png</code></td>
+<td>Opcional</td>
+</tr>
+</tbody></table>
+<h2>Anexo C — Guion de defensa</h2>
+<p><strong>1. ¿Qué es CI y qué es CD?</strong>
+CI es integrar cambios con frecuencia y verificar cada integración de forma
+automática (lint, tests, build). CD automatiza la publicación y el despliegue
+del artefacto validado. En el proyecto, <code>ci.yml</code> es CI y <code>cd.yml</code> es CD.</p>
+<p><strong>2. ¿Por qué dos pipelines?</strong>
+La parte A exigía CircleCI con el material del campus. La parte B pedía
+cambiar la aplicación, usar GitHub y GitHub Actions. Conservar ambos permite
+comparar herramientas y demostrar la migración sin perder trazabilidad.</p>
+<p><strong>3. ¿Qué tipos de prueba has integrado?</strong>
+Unitarias, de integración, basadas en propiedades, cobertura, lint, auditoría
+de dependencias, análisis estático de seguridad y <em>smoke test</em> del contenedor.</p>
+<p><strong>4. ¿Qué aporta el testing basado en propiedades?</strong>
+Genera entradas automáticamente y comprueba invariantes. Complementa los
+ejemplos escritos a mano y explora casos límite que no se habrían previsto.</p>
+<p><strong>5. ¿Cómo evitas desplegar código roto?</strong>
+El CD usa <code>workflow_run</code>: solo se ejecuta si el workflow CI terminó con éxito
+sobre <code>main</code>. Además, el <em>smoke test</em> se ejecuta sobre la imagen publicada por
+digest antes del despliegue opcional.</p>
+<p><strong>6. ¿Por qué publicar por digest y no solo por tag?</strong>
+Un tag puede moverse; un digest <code>sha256:...</code> identifica de forma inmutable el
+contenido exacto de la imagen. El <em>smoke test</em> y el despliegue usan el mismo
+digest.</p>
+<p><strong>7. ¿Cómo proteges los secretos?</strong>
+No hay secretos en el código. El CD usa el <code>GITHUB_TOKEN</code> efímero para GHCR y,
+si se activa el despliegue, secretos del repositorio y un entorno
+<code>production</code> que puede exigir aprobación.</p>
+<p><strong>8. ¿Qué ventaja tiene la matriz de Node 20 y 22?</strong>
+Prueba el mismo código en dos versiones del runtime y detecta APIs o
+comportamientos incompatibles antes de que lleguen a producción.</p>
+<p><strong>9. ¿Qué harías para mejorar el pipeline?</strong>
+Añadir <em>staging</em>, Dependabot, firma de imágenes con <code>cosign</code>, análisis de
+secretos, despliegue en Kubernetes y observabilidad.</p>
+<p><strong>10. ¿Qué has aprendido de la parte A a la parte B?</strong>
+Que la CI sin entrega se queda corta y que la calidad debe medirse. Pasar de
+3 tests a 27 y de un pipeline solo de CI a un CI/CD condicionado cambia por
+completo la confianza en cada cambio.</p>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Si se empujan varios commits seguidos, cancelamos la ejecución anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (ESLint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar ESLint
+        run: npm run lint
+
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tests con umbral de cobertura
+        run: npm run test:coverage
+
+      - name: Publicar informe de cobertura
+        if: matrix.node-version == 20
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  security:
+    name: Seguridad (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Auditar dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+
+  docker-build:
+    name: Docker build + smoke test
+    runs-on: ubuntu-latest
+    needs: [lint, test, security]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir la imagen (sin publicar)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: pipeline-devops:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test del contenedor
+        run: |
+          docker run -d --name app-ci -p 3000:3000 pipeline-devops:ci
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/health; then
+              echo "Smoke test OK"
+              docker rm -f app-ci
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "El contenedor no respondió al healthcheck"
+          docker logs app-ci
+          docker rm -f app-ci
+          exit 1

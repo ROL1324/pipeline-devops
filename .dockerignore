@@ -1,0 +1,14 @@
+node_modules
+coverage
+.git
+.github
+.circleci
+docs
+legacy
+tests
+scripts
+*.md
+.env
+.env.*
+Dockerfile
+docker-compose.yml

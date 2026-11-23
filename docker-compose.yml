@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    image: pipeline-devops:local
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
