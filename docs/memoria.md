@@ -6,7 +6,7 @@
 | **Módulo** | 2 — Integración y entrega continuas |
 | **Alumno** | [Nombre y apellidos] |
 | **Fecha** | 23 de noviembre de 2026 |
-| **Repositorio** | `https://github.com/[usuario]/pipeline-devops` |
+| **Repositorio** | `https://github.com/ROL1324/pipeline-devops` |
 
 ## Resumen ejecutivo
 
@@ -512,7 +512,7 @@ git tag -a parte-a -m "Parte A: CircleCI"
 git commit -m "Parte B: Node.js, GitHub Actions y Docker"
 git tag -a parte-b -m "Parte B: CI/CD completo"
 
-git remote add origin https://github.com/[usuario]/pipeline-devops.git
+git remote add origin https://github.com/ROL1324/pipeline-devops.git
 git push -u origin main --tags
 ```
 

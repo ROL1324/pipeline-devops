@@ -178,7 +178,7 @@ docker compose up --build
 2. Sube el proyecto:
 
    ```bash
-   git remote add origin https://github.com/TU_USUARIO/pipeline-devops.git
+   git remote add origin https://github.com/ROL1324/pipeline-devops.git
    git branch -M main
    git push -u origin main --tags
    ```

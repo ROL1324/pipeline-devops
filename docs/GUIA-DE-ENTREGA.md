@@ -9,12 +9,11 @@ Rellena los datos personales en `docs/memoria.md`:
 
 - `[Nombre de la asignatura]`
 - `[Nombre y apellidos]`
-- `[usuario]` en la URL del repositorio
 
 Comprueba que no queda ningún marcador:
 
 ```bash
-grep -n '\[Nombre\|\[usuario\|\[Nombre de la asignatura' docs/memoria.md
+grep -n '\[Nombre' docs/memoria.md
 ```
 
 ## 1. Crear el repositorio en GitHub
@@ -28,7 +27,7 @@ grep -n '\[Nombre\|\[usuario\|\[Nombre de la asignatura' docs/memoria.md
 
    ```bash
    cd "/Users/raulorenesledesma/Desktop/mis cosas /master/modulo2/pipeline-devops"
-   git remote add origin https://github.com/TU_USUARIO/pipeline-devops.git
+   git remote add origin https://github.com/ROL1324/pipeline-devops.git
    git push -u origin main --tags
    ```
 
