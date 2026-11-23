@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Cobertura y resultados
+coverage/
+test-results/
+.pytest_cache/
+__pycache__/
+
+# Entornos virtuales de Python (parte A)
+.venv/
+legacy/parte-a/.venv/
+venv/
+
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+
+# Sistema y logs
+.DS_Store
+*.log
+npm-debug.log*
